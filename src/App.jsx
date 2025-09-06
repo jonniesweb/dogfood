@@ -27,39 +27,29 @@ const kibbleTable = [
   { weight: 175, cups: { adult: 7.25 } },
 ];
 
-// assume 1 cup kibble = 100g (adjust if needed)
-const CUP_TO_GRAMS = 100;
+const CUP_TO_GRAMS = 112;
 
 function interpolate(table, weight, isRaw, ageWeeks) {
   if (isRaw) {
     // Determine if puppy or adult
     const isAdult = ageWeeks >= 44;
     
-    // Find weight ranges to interpolate between
-    const lower = [...table].reverse().find((r) => r.min <= weight);
-    const upper = table.find((r) => r.max >= weight);
+    // Find the weight range that contains our dog's weight
+    const range = table.find(r => weight >= r.min && weight <= r.max);
     
-    if (!lower || !upper) return 0;
+    if (!range) return 0;
     
-    // Get the appropriate range values based on age
-    const lowerRange = isAdult ? lower.adult : lower.puppy;
-    const upperRange = isAdult ? upper.adult : upper.puppy;
+    // Get the appropriate food amounts for puppy or adult
+    const foodAmounts = isAdult ? range.adult : range.puppy;
+    const [minFood, maxFood] = foodAmounts;
     
-    // Take midpoint of each range
-    const lowerVal = (lowerRange[0] + lowerRange[1]) / 2;
-    const upperVal = (upperRange[0] + upperRange[1]) / 2;
+    // Linear interpolation within the weight range
+    // t represents how far through the range our weight is (0 to 1)
+    const t = (weight - range.min) / (range.max - range.min);
     
-    // If same weight range, return the value
-    if (lower.min === upper.min && lower.max === upper.max) {
-      return lowerVal;
-    }
+    // Interpolate between min and max food amounts
+    return minFood + t * (maxFood - minFood);
     
-    // Interpolate between the ranges based on weight
-    const lowerMid = (lower.min + lower.max) / 2;
-    const upperMid = (upper.min + upper.max) / 2;
-    const t = (weight - lowerMid) / (upperMid - lowerMid);
-    
-    return lowerVal + t * (upperVal - lowerVal);
   } else {
     // kibble interpolation
     const months = ageWeeks / 4.345;
