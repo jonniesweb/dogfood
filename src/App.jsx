@@ -108,35 +108,60 @@ export default function App() {
   return (
     <div className="p-6 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">Dog Food Calculator</h1>
-      <div className="space-y-2">
-        <input
-          type="number"
-          placeholder="Weight (lbs)"
-          value={weight}
-          onChange={(e) => setWeight(e.target.value)}
-          className="border p-2 w-full rounded"
-          min="0"
-        />
-        <input
-          type="number"
-          placeholder="Age (weeks)"
-          value={ageWeeks}
-          onChange={(e) => setAgeWeeks(e.target.value)}
-          className="border p-2 w-full rounded"
-          min="0"
-        />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
+            Weight
+          </label>
+          <div className="relative">
+            <input
+              id="weight"
+              type="number"
+              placeholder="Enter weight"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="border p-2 pr-12 w-full rounded"
+              min="0"
+            />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+              lbs
+            </span>
+          </div>
+        </div>
+        <div className="flex-1">
+          <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
+            Age
+          </label>
+          <div className="relative">
+            <input
+              id="age"
+              type="number"
+              placeholder="Enter age"
+              value={ageWeeks}
+              onChange={(e) => setAgeWeeks(e.target.value)}
+              className="border p-2 pr-16 w-full rounded"
+              min="0"
+            />
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+              weeks
+            </span>
+          </div>
+        </div>
       </div>
 
       {result && (
         <div className="mt-6 space-y-2">
-          <p>Raw food daily: {result.raw.toFixed(0)} g</p>
-          <p>Kibble daily: {result.kibble.toFixed(0)} g</p>
-          
-          <p>Raw food per serving (3/day): <strong>{(result.raw / 3).toFixed(0)} g</strong></p>
-          <p>Kibble per serving (3/day): <strong>{(result.kibble / 3).toFixed(0)} g</strong></p>
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm font-medium text-gray-700 mb-2">Subtotals</p>
+            <p>Raw food daily: {result.raw.toFixed(0)} g</p>
+            <p>Kibble daily: {result.kibble.toFixed(0)} g</p>
+            
+            <p>Raw food per serving (3/day): <strong>{(result.raw / 3).toFixed(0)} g</strong></p>
+            <p>Kibble per serving (3/day): <strong>{(result.kibble / 3).toFixed(0)} g</strong></p>
+          </div>
           
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-2">50% portions per serving:</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">Feed your dog this for 50% of each food type:</p>
             <p>Raw food (50%): <strong>{(result.raw / 3 / 2).toFixed(0)} g</strong></p>
             <p>Kibble (50%): <strong>{(result.kibble / 3 / 2).toFixed(0)} g</strong></p>
           </div>
