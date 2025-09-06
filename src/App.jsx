@@ -102,10 +102,7 @@ export default function App() {
     const raw = interpolate(rawTable, _weight, true, _ageWeeks);
     const kibble = interpolate(kibbleTable, _weight, false, _ageWeeks);
 
-    const daily = (raw + kibble) / 2;
-    const perMeal = daily / 3;
-
-    setResult({ raw, kibble, daily, perMeal });
+    setResult({ raw, kibble });
   }, [weight, ageWeeks]);
 
   return (
@@ -137,6 +134,12 @@ export default function App() {
           
           <p>Raw food per serving (3/day): <strong>{(result.raw / 3).toFixed(0)} g</strong></p>
           <p>Kibble per serving (3/day): <strong>{(result.kibble / 3).toFixed(0)} g</strong></p>
+          
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm font-medium text-gray-700 mb-2">50% portions per serving:</p>
+            <p>Raw food (50%): <strong>{(result.raw / 3 / 2).toFixed(0)} g</strong></p>
+            <p>Kibble (50%): <strong>{(result.kibble / 3 / 2).toFixed(0)} g</strong></p>
+          </div>
         </div>
       )}
     </div>
