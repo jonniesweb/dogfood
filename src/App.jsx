@@ -1,29 +1,30 @@
 import React, { useState, useEffect } from "react";
 
-// --- Data tables simplified to grams only ---
+// weight in lbs to grams of food
 const rawTable = [
   { min: 0, max: 5, puppy: [36, 73], adult: [50, 60] },
   { min: 5, max: 10, puppy: [91, 182], adult: [60, 100] },
-  { min: 10, max: 25, puppy: [182, 454], adult: [140, 275] },
+  { min: 10, max: 25, puppy: [182, 454], adult: [100, 275] },
   { min: 25, max: 50, puppy: [454, 908], adult: [275, 550] },
   { min: 50, max: 75, puppy: [908, 1362], adult: [550, 800] },
   { min: 75, max: 100, puppy: [1362, 1816], adult: [800, 1000] },
   { min: 100, max: 125, puppy: [1816, 2270], adult: [1000, 1200] },
 ];
 
+// age in months to cups
 const kibbleTable = [
-  { weight: 3, cups: { "2-4": 0.33, "4-8": 0.33, "8-12": 0.33, adult: 0.33 } },
-  { weight: 5, cups: { "2-4": 1, "4-8": 0.5, "8-12": 0.5, adult: 0.33 } },
-  { weight: 10, cups: { "2-4": 1.33, "4-8": 0.75, "8-12": 0.75, adult: 0.66 } },
-  { weight: 20, cups: { "2-4": 2.75, "4-8": 1.33, "8-12": 1.33, adult: 1.33 } },
-  { weight: 30, cups: { "2-4": 3.33, "4-8": 2.25, "8-12": 2.25, adult: 2 } },
-  { weight: 40, cups: { "2-4": 4.33, "4-8": 3, "8-12": 2.66, adult: 2.5 } },
-  { weight: 60, cups: { "4-8": 3.75, "8-12": 3, adult: 3.25 } },
-  { weight: 80, cups: { "4-8": 5.33, "8-12": 4.25, adult: 4 } },
-  { weight: 100, cups: { "4-8": 6.25, "8-12": 5, adult: 4.75 } },
-  { weight: 125, cups: { adult: 6 } },
-  { weight: 150, cups: { adult: 6.5 } },
-  { weight: 175, cups: { adult: 7.5 } },
+  { weight: 3, cups: { "2-4": 0.66, "4-8": 0.5, "8-12": 0.5, adult: 0.33 } },
+  { weight: 5, cups: { "2-4": 1, "4-8": 0.75, "8-12": 0.66, adult: 0.5 } },
+  { weight: 10, cups: { "2-4": 1.5, "4-8": 1.33, "8-12": 1.25, adult: 0.75 } },
+  { weight: 20, cups: { "2-4": 2.75, "4-8": 2.25, "8-12": 1.75, adult: 1.33 } },
+  { weight: 30, cups: { "2-4": 3.66, "4-8": 3, "8-12": 2.33, adult: 2 } },
+  { weight: 40, cups: { "2-4": 4.5, "4-8": 3.75, "8-12": 3, adult: 2.33 } },
+  { weight: 60, cups: { "4-8": 5.25, "8-12": 4.25, adult: 3.25 } },
+  { weight: 80, cups: { "4-8": 6.25, "8-12": 5, adult: 4 } },
+  { weight: 100, cups: { "8-12": 6, adult: 4.75 } },
+  { weight: 125, cups: { "8-12": 7, adult: 5.66 } },
+  { weight: 150, cups: { adult: 6.33 } },
+  { weight: 175, cups: { adult: 7.25 } },
 ];
 
 // assume 1 cup kibble = 100g (adjust if needed)
@@ -31,12 +32,34 @@ const CUP_TO_GRAMS = 100;
 
 function interpolate(table, weight, isRaw, ageWeeks) {
   if (isRaw) {
-    const entry = table.find((r) => weight >= r.min && weight <= r.max);
-    if (!entry) return 0;
-
-    const range = ageWeeks < 44 ? entry.puppy : entry.adult;
-    // take midpoint of range
-    return (range[0] + range[1]) / 2;
+    // Determine if puppy or adult
+    const isAdult = ageWeeks >= 44;
+    
+    // Find weight ranges to interpolate between
+    const lower = [...table].reverse().find((r) => r.min <= weight);
+    const upper = table.find((r) => r.max >= weight);
+    
+    if (!lower || !upper) return 0;
+    
+    // Get the appropriate range values based on age
+    const lowerRange = isAdult ? lower.adult : lower.puppy;
+    const upperRange = isAdult ? upper.adult : upper.puppy;
+    
+    // Take midpoint of each range
+    const lowerVal = (lowerRange[0] + lowerRange[1]) / 2;
+    const upperVal = (upperRange[0] + upperRange[1]) / 2;
+    
+    // If same weight range, return the value
+    if (lower.min === upper.min && lower.max === upper.max) {
+      return lowerVal;
+    }
+    
+    // Interpolate between the ranges based on weight
+    const lowerMid = (lower.min + lower.max) / 2;
+    const upperMid = (upper.min + upper.max) / 2;
+    const t = (weight - lowerMid) / (upperMid - lowerMid);
+    
+    return lowerVal + t * (upperVal - lowerVal);
   } else {
     // kibble interpolation
     const months = ageWeeks / 4.345;
