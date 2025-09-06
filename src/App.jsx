@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from "react";
 
+// Custom hook for localStorage with useState-like syntax
+function useLocalStorage(key, defaultValue) {
+  const [value, setValue] = useState(() => {
+    const savedValue = localStorage.getItem(key);
+    return savedValue !== null ? savedValue : defaultValue;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [key, value]);
+
+  return [value, setValue];
+}
+
 // weight in lbs to grams of food
 const rawTable = [
   { min: 0, max: 5, puppy: [36, 73], adult: [50, 60] },
@@ -73,8 +87,8 @@ function interpolate(table, weight, isRaw, ageWeeks) {
 }
 
 export default function App() {
-  const [weight, setWeight] = useState("10");
-  const [ageWeeks, setAgeWeeks] = useState("9");
+  const [weight, setWeight] = useLocalStorage("dogWeight", "10");
+  const [ageWeeks, setAgeWeeks] = useLocalStorage("dogAgeWeeks", "9");
   const [result, setResult] = useState(null);
 
   useEffect(() => {
@@ -104,6 +118,7 @@ export default function App() {
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
           className="border p-2 w-full rounded"
+          min="0"
         />
         <input
           type="number"
@@ -111,6 +126,7 @@ export default function App() {
           value={ageWeeks}
           onChange={(e) => setAgeWeeks(e.target.value)}
           className="border p-2 w-full rounded"
+          min="0"
         />
       </div>
 
