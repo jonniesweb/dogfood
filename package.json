@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "wrangler deploy",
-    "buildanddeploy": "npm run build && npm run deploy"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "react": "^18.2.0",
