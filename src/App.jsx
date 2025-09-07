@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import poppyFace from "./poppy-face.png";
 
 // Custom hook for localStorage with useState-like syntax
 function useLocalStorage(key, defaultValue) {
@@ -86,6 +87,85 @@ function interpolate(table, weight, isRaw, ageWeeks) {
   }
 }
 
+// Component for animated background Poppy faces
+function AnimatedPoppyBackground() {
+  const [poppyFaces, setPoppyFaces] = useState([]);
+
+  useEffect(() => {
+    // Generate random positions and animation properties for Poppy faces
+    const faces = Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      centerX: 20 + Math.random() * 60, // Center point for orbit (20-80%)
+      centerY: 20 + Math.random() * 60, // Center point for orbit (20-80%)
+      radius: 50 + Math.random() * 100, // Orbit radius in pixels
+      size: 120 + Math.random() * 80, // Random size between 120-200px
+      orbitDuration: 15 + Math.random() * 25, // Random orbit duration 15-40s
+      spinDuration: 3 + Math.random() * 7, // Random self-spin duration 3-10s
+      delay: 0, // Random delay 0-10s
+      opacity: 0.15 + Math.random() * 0.25, // Random opacity 0.15-0.4
+      clockwise: Math.random() > 0.5, // Random direction
+    }));
+    setPoppyFaces(faces);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
+      <style jsx>{`
+        @keyframes orbit-clockwise {
+          from {
+            transform: translate(-50%, -50%) rotate(0deg) translateX(var(--radius)) rotate(0deg);
+          }
+          to {
+            transform: translate(-50%, -50%) rotate(360deg) translateX(var(--radius)) rotate(-360deg);
+          }
+        }
+        @keyframes orbit-counterclockwise {
+          from {
+            transform: translate(-50%, -50%) rotate(0deg) translateX(var(--radius)) rotate(0deg);
+          }
+          to {
+            transform: translate(-50%, -50%) rotate(-360deg) translateX(var(--radius)) rotate(360deg);
+          }
+        }
+        @keyframes self-spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+      {poppyFaces.map((face) => (
+        <div
+          key={face.id}
+          className="absolute"
+          style={{
+            left: `${face.centerX}%`,
+            top: `${face.centerY}%`,
+            '--radius': `${face.radius}px`,
+            animation: `${face.clockwise ? 'orbit-clockwise' : 'orbit-counterclockwise'} ${face.orbitDuration}s linear infinite`,
+            animationDelay: `${face.delay}s`,
+          }}
+        >
+          <img
+            src={poppyFace}
+            alt=""
+            className="block"
+            style={{
+              width: `${face.size}px`,
+              height: `${face.size}px`,
+              opacity: face.opacity,
+              animation: `self-spin ${face.spinDuration}s linear infinite`,
+              animationDelay: `${face.delay}s`,
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
   const [weight, setWeight] = useLocalStorage("dogWeight", "10");
   const [ageWeeks, setAgeWeeks] = useLocalStorage("dogAgeWeeks", "9");
@@ -106,8 +186,10 @@ export default function App() {
   }, [weight, ageWeeks]);
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Dog Food Calculator</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative">
+      <AnimatedPoppyBackground />
+      <div className="relative z-10 p-6 max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold mb-4">Dog Food Calculator</h1>
       <div className="flex gap-4">
         <div className="flex-1">
           <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
@@ -167,6 +249,7 @@ export default function App() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
