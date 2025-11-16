@@ -168,13 +168,52 @@ function AnimatedPoppyBackground() {
 
 export default function App() {
   const [weight, setWeight] = useLocalStorage("dogWeight", "10");
-  const [ageWeeks, setAgeWeeks] = useLocalStorage("dogAgeWeeks", "9");
+  const [birthDate, setBirthDate] = useLocalStorage("dogBirthDate", "");
   const [result, setResult] = useState(null);
+
+  // Calculate weeks from birth date
+  const calculateAgeWeeks = (dateString) => {
+    if (!dateString) return null;
+    const birth = new Date(dateString);
+    const today = new Date();
+    // Set time to midnight to avoid time-of-day issues
+    birth.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffTime = today - birth;
+    if (diffTime < 0) return null; // Future date
+    const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+    return diffWeeks;
+  };
+
+  // Calculate months from birth date
+  const calculateAgeMonths = (dateString) => {
+    if (!dateString) return null;
+    const birth = new Date(dateString);
+    const today = new Date();
+    // Set time to midnight to avoid time-of-day issues
+    birth.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    const diffTime = today - birth;
+    if (diffTime < 0) return null; // Future date
+    
+    // Calculate months by comparing year and month
+    const yearsDiff = today.getFullYear() - birth.getFullYear();
+    const monthsDiff = today.getMonth() - birth.getMonth();
+    const daysDiff = today.getDate() - birth.getDate();
+    
+    let totalMonths = yearsDiff * 12 + monthsDiff;
+    // If the day hasn't occurred yet this month, subtract one month
+    if (daysDiff < 0) {
+      totalMonths--;
+    }
+    
+    return totalMonths;
+  };
 
   useEffect(() => {
     const _weight = parseFloat(weight);
-    const _ageWeeks = parseFloat(ageWeeks);
-    if (!_weight || !_ageWeeks) {
+    const _ageWeeks = calculateAgeWeeks(birthDate);
+    if (!_weight || _ageWeeks === null || _ageWeeks < 0) {
       setResult(null);
       return;
     }
@@ -183,7 +222,7 @@ export default function App() {
     const kibble = interpolate(kibbleTable, _weight, false, _ageWeeks);
 
     setResult({ raw, kibble });
-  }, [weight, ageWeeks]);
+  }, [weight, birthDate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative">
@@ -212,22 +251,23 @@ export default function App() {
         </div>
         <div className="flex-1">
           <label htmlFor="age" className="block text-sm font-medium text-gray-700 mb-1">
-            Age
+            Birth Date
           </label>
           <div className="relative">
             <input
               id="age"
-              type="number"
-              placeholder="Enter age"
-              value={ageWeeks}
-              onChange={(e) => setAgeWeeks(e.target.value)}
-              className="border p-2 pr-16 w-full rounded"
-              min="0"
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              className="border p-2 w-full rounded"
+              max={new Date().toISOString().split('T')[0]}
             />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-              weeks
-            </span>
           </div>
+          {birthDate && (
+            <p className="text-xs text-gray-500 mt-1">
+              {calculateAgeWeeks(birthDate)} weeks old ({calculateAgeMonths(birthDate)} months)
+            </p>
+          )}
         </div>
       </div>
 
