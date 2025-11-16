@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import poppyFace from "./poppy-face.png";
 
 // Custom hook for localStorage with useState-like syntax
@@ -174,40 +175,19 @@ export default function App() {
   // Calculate weeks from birth date
   const calculateAgeWeeks = (dateString) => {
     if (!dateString) return null;
-    const birth = new Date(dateString);
-    const today = new Date();
-    // Set time to midnight to avoid time-of-day issues
-    birth.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    const diffTime = today - birth;
-    if (diffTime < 0) return null; // Future date
-    const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
-    return diffWeeks;
+    const birth = dayjs(dateString);
+    const today = dayjs();
+    if (!birth.isValid() || birth.isAfter(today)) return null;
+    return today.diff(birth, 'week');
   };
 
   // Calculate months from birth date
   const calculateAgeMonths = (dateString) => {
     if (!dateString) return null;
-    const birth = new Date(dateString);
-    const today = new Date();
-    // Set time to midnight to avoid time-of-day issues
-    birth.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-    const diffTime = today - birth;
-    if (diffTime < 0) return null; // Future date
-    
-    // Calculate months by comparing year and month
-    const yearsDiff = today.getFullYear() - birth.getFullYear();
-    const monthsDiff = today.getMonth() - birth.getMonth();
-    const daysDiff = today.getDate() - birth.getDate();
-    
-    let totalMonths = yearsDiff * 12 + monthsDiff;
-    // If the day hasn't occurred yet this month, subtract one month
-    if (daysDiff < 0) {
-      totalMonths--;
-    }
-    
-    return totalMonths;
+    const birth = dayjs(dateString);
+    const today = dayjs();
+    if (!birth.isValid() || birth.isAfter(today)) return null;
+    return today.diff(birth, 'month');
   };
 
   useEffect(() => {
@@ -260,7 +240,7 @@ export default function App() {
               value={birthDate}
               onChange={(e) => setBirthDate(e.target.value)}
               className="border p-2 w-full rounded"
-              max={new Date().toISOString().split('T')[0]}
+              max={dayjs().format('YYYY-MM-DD')}
             />
           </div>
           {birthDate && (
