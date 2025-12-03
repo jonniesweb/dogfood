@@ -170,6 +170,7 @@ function AnimatedPoppyBackground() {
 export default function App() {
   const [weight, setWeight] = useLocalStorage("dogWeight", "10");
   const [birthDate, setBirthDate] = useLocalStorage("dogBirthDate", "");
+  const [servingsPerDay, setServingsPerDay] = useLocalStorage("servingsPerDay", "3");
   const [result, setResult] = useState(null);
 
   // Calculate weeks from birth date
@@ -251,6 +252,36 @@ export default function App() {
         </div>
       </div>
 
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Servings per day
+        </label>
+        <div className="flex gap-4">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="servingsPerDay"
+              value="2"
+              checked={servingsPerDay === "2"}
+              onChange={(e) => setServingsPerDay(e.target.value)}
+              className="mr-2"
+            />
+            <span>2 servings</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="radio"
+              name="servingsPerDay"
+              value="3"
+              checked={servingsPerDay === "3"}
+              onChange={(e) => setServingsPerDay(e.target.value)}
+              className="mr-2"
+            />
+            <span>3 servings</span>
+          </label>
+        </div>
+      </div>
+
       {result && (
         <div className="mt-6 space-y-2">
           <div className="mt-4 pt-4 border-t border-gray-200">
@@ -258,14 +289,14 @@ export default function App() {
             <p>Raw food daily: {result.raw.toFixed(0)} g</p>
             <p>Kibble daily: {result.kibble.toFixed(0)} g</p>
             
-            <p>Raw food per serving (3/day): <strong>{(result.raw / 3).toFixed(0)} g</strong></p>
-            <p>Kibble per serving (3/day): <strong>{(result.kibble / 3).toFixed(0)} g</strong></p>
+            <p>Raw food per serving ({servingsPerDay}/day): <strong>{(result.raw / parseInt(servingsPerDay)).toFixed(0)} g</strong></p>
+            <p>Kibble per serving ({servingsPerDay}/day): <strong>{(result.kibble / parseInt(servingsPerDay)).toFixed(0)} g</strong></p>
           </div>
           
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-sm font-medium text-gray-700 mb-2">Feed your dog this for 50% of each food type:</p>
-            <p>Raw food (50%): <strong>{(result.raw / 3 / 2).toFixed(0)} g</strong></p>
-            <p>Kibble (50%): <strong>{(result.kibble / 3 / 2).toFixed(0)} g</strong></p>
+            <p>Raw food (50%): <strong>{(result.raw / parseInt(servingsPerDay) / 2).toFixed(0)} g</strong></p>
+            <p>Kibble (50%): <strong>{(result.kibble / parseInt(servingsPerDay) / 2).toFixed(0)} g</strong></p>
           </div>
         </div>
       )}
